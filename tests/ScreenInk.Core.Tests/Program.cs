@@ -21,6 +21,11 @@ var tests = new (string Name, Action Run)[]
     ("Open freehand outline has round caps beyond both endpoints", OpenOutlineHasRoundCaps),
     ("Closed gesture overlaps round caps without cutting its seam", ClosedGestureOverlapsRoundCaps),
     ("Natural pen makes slow motion wider than fast motion", NaturalPenVariesWidthWithSpeed),
+    ("High-speed tail keeps thinning as mouse speed rises", HighSpeedTailKeepsThinning),
+    ("Ink core pools gently at a slow corner", InkCorePoolsGentlyAtCorner),
+    ("Corner pooling leaves a straight stroke unchanged", CornerPoolingLeavesStraightStrokeUnchanged),
+    ("Very short movement creates a round-ended capsule", VeryShortMovementCreatesCapsule),
+    ("Ink coverage variation is deterministic and bounded", InkCoverageVariationIsDeterministicAndBounded),
     ("Temporary ink remains fully visible for 1.65 seconds", TemporaryInkStaysVisible),
     ("Temporary ink fades and expires at two seconds", TemporaryInkFadesAndExpires),
     ("Nearby strokes share a lifetime group and reset it", NearbyStrokesShareLifetimeGroup),
@@ -364,6 +369,203 @@ static void NaturalPenVariesWidthWithSpeed()
     }
 
     AssertAllFinite(outline);
+}
+
+static void HighSpeedTailKeepsThinning()
+{
+    var slow = BuildConstantSpeedOutline(0.20);
+    var fast = BuildConstantSpeedOutline(0.85);
+    var veryFast = BuildConstantSpeedOutline(2.40);
+    var extreme = BuildConstantSpeedOutline(12.0);
+    const int sampleIndex = 24;
+    const int pointCount = 28;
+    var slowWidth = OutlineWidthAt(slow, pointCount, sampleIndex);
+    var fastWidth = OutlineWidthAt(fast, pointCount, sampleIndex);
+    var veryFastWidth = OutlineWidthAt(veryFast, pointCount, sampleIndex);
+    var extremeWidth = OutlineWidthAt(extreme, pointCount, sampleIndex);
+
+    if (slowWidth <= fastWidth || fastWidth <= veryFastWidth || veryFastWidth <= extremeWidth)
+    {
+        throw new InvalidOperationException(
+            $"Expected progressive open-ended thinning, got {slowWidth:F2}px, {fastWidth:F2}px, " +
+            $"{veryFastWidth:F2}px, {extremeWidth:F2}px.");
+    }
+
+    if (extremeWidth < 4.2)
+    {
+        throw new InvalidOperationException(
+            $"Extreme-speed stroke became too fragile: {extremeWidth:F2}px from an 8 px preset.");
+    }
+}
+
+static IReadOnlyList<InkPoint> BuildConstantSpeedOutline(double speed)
+{
+    const int pointCount = 28;
+    const double segmentLength = 8;
+    var elapsedPerSegment = Math.Max(1L, (long)Math.Round(segmentLength / speed));
+    var points = Enumerable.Range(0, pointCount)
+        .Select(index => new StrokePoint(index * segmentLength, 20, index * elapsedPerSegment))
+        .ToArray();
+    return new FreehandStrokeOutlineBuilder(new FreehandStrokeOptions
+    {
+        Size = 8,
+        Thinning = 1.00,
+        MaximumSpeed = 0.65,
+        SpeedResponseExponent = 0.80,
+        UseOpenEndedSpeedResponse = true,
+        PressureSmoothing = 0.52,
+    }).Build(points);
+}
+
+static void InkCorePoolsGentlyAtCorner()
+{
+    var points = new[]
+    {
+        new StrokePoint(0, 20, 0),
+        new StrokePoint(10, 20, 30),
+        new StrokePoint(20, 20, 60),
+        new StrokePoint(30, 20, 90),
+        new StrokePoint(30, 30, 120),
+        new StrokePoint(30, 40, 150),
+        new StrokePoint(30, 50, 180),
+    };
+    var baseline = new FreehandStrokeOutlineBuilder(new FreehandStrokeOptions
+    {
+        Size = 8,
+        Thinning = 0.84,
+        MaximumSpeed = 0.78,
+        PressureSmoothing = 0.44,
+    }).Build(points);
+    var pooled = new FreehandStrokeOutlineBuilder(new FreehandStrokeOptions
+    {
+        Size = 8,
+        Thinning = 0.84,
+        MaximumSpeed = 0.78,
+        PressureSmoothing = 0.44,
+        CornerPoolingStrength = 0.14,
+        CornerPoolingSmoothing = 0.48,
+    }).Build(points);
+
+    var baselineWidth = OutlineWidthAt(baseline, points.Length, 3);
+    var pooledWidth = OutlineWidthAt(pooled, points.Length, 3);
+    if (pooledWidth <= baselineWidth * 1.02)
+    {
+        throw new InvalidOperationException(
+            $"Expected visible but gentle corner pooling, got {baselineWidth:F2}px -> {pooledWidth:F2}px.");
+    }
+
+    if (pooledWidth > baselineWidth * 1.14)
+    {
+        throw new InvalidOperationException(
+            $"Corner pooling exceeded the anti-blob limit: {baselineWidth:F2}px -> {pooledWidth:F2}px.");
+    }
+
+    AssertAllFinite(pooled);
+}
+
+static void CornerPoolingLeavesStraightStrokeUnchanged()
+{
+    var points = Enumerable.Range(0, 7)
+        .Select(index => new StrokePoint(index * 10, 20, index * 30))
+        .ToArray();
+    var baseline = new FreehandStrokeOutlineBuilder(new FreehandStrokeOptions
+    {
+        Size = 8,
+        Thinning = 0.84,
+        MaximumSpeed = 0.78,
+        PressureSmoothing = 0.44,
+    }).Build(points);
+    var pooled = new FreehandStrokeOutlineBuilder(new FreehandStrokeOptions
+    {
+        Size = 8,
+        Thinning = 0.84,
+        MaximumSpeed = 0.78,
+        PressureSmoothing = 0.44,
+        CornerPoolingStrength = 0.14,
+        CornerPoolingSmoothing = 0.48,
+    }).Build(points);
+
+    AssertEqual(baseline.Count, pooled.Count);
+    for (var index = 0; index < baseline.Count; index++)
+    {
+        AssertNear(baseline[index].X, pooled[index].X, 0.0001);
+        AssertNear(baseline[index].Y, pooled[index].Y, 0.0001);
+    }
+}
+
+static double OutlineWidthAt(IReadOnlyList<InkPoint> outline, int pointCount, int pointIndex)
+{
+    const int capIntermediateCount = 5;
+    var rightStart = pointCount + capIntermediateCount;
+    return outline[pointIndex].DistanceTo(
+        outline[rightStart + (pointCount - 1 - pointIndex)]);
+}
+
+static void VeryShortMovementCreatesCapsule()
+{
+    var outline = new FreehandStrokeOutlineBuilder(new FreehandStrokeOptions
+    {
+        Size = 8,
+        Thinning = 0,
+        DotThresholdLength = 1.25,
+    }).Build(
+    [
+        new StrokePoint(0, 20, 0),
+        new StrokePoint(5, 20, 20),
+    ]);
+
+    if (outline.Min(point => point.X) > -3.5 || outline.Max(point => point.X) < 8.5)
+    {
+        throw new InvalidOperationException("Expected a 5 px movement to retain direction with two round caps.");
+    }
+
+    AssertAllFinite(outline);
+}
+
+static void InkCoverageVariationIsDeterministicAndBounded()
+{
+    var points = Enumerable.Range(0, 18)
+        .Select(index => new StrokePoint(13 + (index * 4), 27, index * 16))
+        .ToArray();
+    var plain = new FreehandStrokeOutlineBuilder(new FreehandStrokeOptions
+    {
+        Size = 8,
+        Thinning = 0,
+        DotThresholdLength = 1.25,
+    }).Build(points);
+    var options = new FreehandStrokeOptions
+    {
+        Size = 8,
+        Thinning = 0,
+        DotThresholdLength = 1.25,
+        CoverageVariationStrength = 0.024,
+        CoverageVariationWavelength = 18,
+    };
+    var first = new FreehandStrokeOutlineBuilder(options).Build(points);
+    var second = new FreehandStrokeOutlineBuilder(options).Build(points);
+    var changed = false;
+
+    for (var index = 0; index < points.Length; index++)
+    {
+        var plainWidth = OutlineWidthAt(plain, points.Length, index);
+        var firstWidth = OutlineWidthAt(first, points.Length, index);
+        var secondWidth = OutlineWidthAt(second, points.Length, index);
+        AssertNear(firstWidth, secondWidth, 0.000001);
+        if (Math.Abs(firstWidth - plainWidth) > 0.01)
+        {
+            changed = true;
+        }
+
+        if (Math.Abs(firstWidth - plainWidth) > plainWidth * 0.025)
+        {
+            throw new InvalidOperationException("Coverage variation exceeded its 2.5% visual bound.");
+        }
+    }
+
+    if (!changed)
+    {
+        throw new InvalidOperationException("Expected deterministic coverage variation to affect the ink core.");
+    }
 }
 
 static void TemporaryInkStaysVisible()

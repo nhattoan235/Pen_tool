@@ -12,7 +12,21 @@ public sealed record FreehandStrokeOptions
 
     public double MaximumSpeed { get; init; } = 0.85;
 
+    public double SpeedResponseExponent { get; init; } = 1;
+
+    public bool UseOpenEndedSpeedResponse { get; init; }
+
     public double PressureSmoothing { get; init; } = 0.36;
+
+    public double CornerPoolingStrength { get; init; }
+
+    public double CornerPoolingSmoothing { get; init; } = 0.45;
+
+    public double DotThresholdLength { get; init; }
+
+    public double CoverageVariationStrength { get; init; }
+
+    public double CoverageVariationWavelength { get; init; } = 18;
 
     public void Validate()
     {
@@ -41,9 +55,39 @@ public sealed record FreehandStrokeOptions
             throw new ArgumentOutOfRangeException(nameof(MaximumSpeed));
         }
 
+        if (SpeedResponseExponent is < 0.25 or > 2)
+        {
+            throw new ArgumentOutOfRangeException(nameof(SpeedResponseExponent));
+        }
+
         if (PressureSmoothing is <= 0 or > 1)
         {
             throw new ArgumentOutOfRangeException(nameof(PressureSmoothing));
+        }
+
+        if (CornerPoolingStrength is < 0 or > 0.25)
+        {
+            throw new ArgumentOutOfRangeException(nameof(CornerPoolingStrength));
+        }
+
+        if (CornerPoolingSmoothing is <= 0 or > 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(CornerPoolingSmoothing));
+        }
+
+        if (DotThresholdLength < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(DotThresholdLength));
+        }
+
+        if (CoverageVariationStrength is < 0 or > 0.05)
+        {
+            throw new ArgumentOutOfRangeException(nameof(CoverageVariationStrength));
+        }
+
+        if (CoverageVariationWavelength <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(CoverageVariationWavelength));
         }
     }
 }

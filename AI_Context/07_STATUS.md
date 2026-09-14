@@ -130,18 +130,45 @@ Phase 0–5 hoàn thành ở mức MVP. Phase 6 đã có shape snap và Lasso se
 - [x] Hook-based drag bị loại sau khi vẫn thất bại thực tế; thay bằng native caption drag `WM_NCLBUTTONDOWN(HTCAPTION)`.
 - [x] Xóa drop-shadow hoàn toàn cho cả dark/light toolbar, ở cả XAML lẫn theme runtime.
 - [x] Native caption drag candidate build sạch; 31/31 tests và lifecycle smoke-test đạt.
+- [x] Người dùng xác nhận native caption drag hoạt động tốt và toolbar dark không còn bóng gây khó chịu.
+- [x] Đặc tả Phase 7G Signature Ink Polish với baseline A và kế hoạch Candidate B/C.
+- [x] Candidate 7G-B: ink-core speed mapping nhạy hơn và corner pooling theo turn/slow-motion weight.
+- [x] Candidate 7G-B giữ nguyên Natural Pen 7F main outline; thêm hai geometry regression tests.
+- [x] Candidate 7G-B build sạch; 33/33 tests và lifecycle smoke-test đạt.
+- [x] Người dùng xác nhận corner pooling của 7G-B cho góc cua tự nhiên.
+- [x] Trace thật phát hiện speed mapping cũ bão hòa 0,85 px/ms trong khi thao tác đạt 2,4–4,0 px/ms.
+- [x] Candidate 7G-B2 thêm nonlinear high-speed tail cho main outline/core, không nắn centerline.
+- [x] Candidate 7G-B2 build sạch; 34/34 tests và lifecycle smoke-test đạt.
+- [x] Người dùng đánh giá B2 tốt hơn một chút; trace mới cho thấy hard clamp 3,2 px/ms vẫn bão hòa ở sample 8–28 px/ms.
+- [x] Candidate 7G-B3 chuyển sang open-ended asymptotic speed response, có width floor tự nhiên và giữ round cap.
+- [x] B3 regression kiểm tra bốn mức tốc độ đến 12 px/ms; 34/34 tests và lifecycle smoke-test đạt.
+- [x] Người dùng đánh giá B3 vẫn chưa khác rõ; replay preset 8 px cho khoảng 5,4–10,4 px.
+- [x] Candidate 7G-B4 mở biên độ silhouette dự kiến khoảng 4,4–11,4 px, giữ round cap/core/corner behavior.
+- [x] Người dùng đánh giá cảm giác B4 có vẻ ổn; giữ B4 làm baseline thắng tạm thời, không tăng width response thêm.
+- [x] Candidate 7G-C1: dot threshold 1,25 px, short-stroke round capsule và deterministic core variation tối đa 2,4%.
+- [x] Candidate C1 build sạch; 36/36 tests và lifecycle smoke-test đạt.
+- [x] Người dùng xác nhận C1 ổn; khóa C1 trên nền B4 thành `7G-signature-ink-final`.
+- [x] Phase 7G Signature Ink / Color & Ink Appearance gate hoàn thành.
+- [x] Signature Ink final build sạch ở Debug và Release; 36/36 tests đạt ở cả hai cấu hình.
+- [x] Debug/Release lifecycle smoke-test đạt; static regression xác nhận base/core cùng đi qua fade, Eraser, detach/restore, Lasso move và history snapshots.
+- [x] Collapsed ink puck mới thay record-like dot; người dùng xác nhận tốt, drag/click và no-shadow giữ nguyên.
+- [x] Publish self-contained single-file `win-x64` cho version `0.9.0-beta.1`; published smoke-test đạt.
+- [x] Inno Setup 7 single-user installer candidate; silent install/smoke/uninstall cô lập đều exit 0 và cleanup sạch.
+- [x] Ghi SHA-256/package report; installer hiện chưa ký Authenticode.
 
 ## Chưa hoàn thành
 
 - [ ] Phase 6 tùy chọn: Snap animation, Recolor và Pin selection.
 - [ ] Phase 7 hardening matrix còn lại: golden images, nhiều loại chuột/DPI và stress benchmark (không chặn Phase 8).
+- [x] Phase 7G: C1/B4 đã được người dùng chọn và khóa Signature Ink/Color Gate.
 - [ ] Phase 8 backlog: Capture vùng, kiểm thử output thật và hot-plug/DPI runtime.
-- [ ] Phase 9: A/B Natural Ink, manual regression và packaging.
+- [ ] Phase 9: Signature Ink và packaging candidate hoàn thành; còn manual UI regression và quyết định code signing/phân phối.
+- [ ] Phase 9 manual UI regression còn cần xác nhận trực tiếp cho Pixel/Object Eraser, Lasso, Undo/Redo, fade và capture trên bản final.
 - [ ] Tạm hoãn theo yêu cầu: reduced motion, license và third-party notices.
 
 ## Bước tiếp theo đề xuất
 
-Bước tiếp theo là người dùng xác nhận native caption drag của collapsed toolbar dot và toolbar dark không còn bóng. Nếu đạt, regression nhanh Pixel Eraser/Undo và Lasso move rồi khóa Color Gate.
+Bước tiếp theo là người dùng chạy manual regression trên installer candidate: Pixel/Object Eraser, Lasso move/Delete, Undo/Redo, temporary fade, Copy/Save capture, hotkeys và toolbar theme/drag. Nếu đạt, beta sẵn sàng phân phối nội bộ; code signing là gate riêng cho public distribution.
 
 ## Câu hỏi chưa khóa
 

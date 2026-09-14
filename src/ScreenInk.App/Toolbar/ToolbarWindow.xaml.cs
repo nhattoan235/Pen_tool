@@ -516,6 +516,13 @@ public partial class ToolbarWindow : Window
         ExpandedSurface.Effect = null;
         CollapsedButton.Background = surface;
         CollapsedButton.BorderBrush = border;
+        CollapsedInnerDisc.Fill = isDark
+            ? CreateBrush(0xFF, 0x10, 0x13, 0x1A)
+            : CreateBrush(0xFF, 0x28, 0x2D, 0x36);
+        CollapsedInnerDisc.Stroke = isDark
+            ? CreateBrush(0x38, 0xFF, 0xFF, 0xFF)
+            : CreateBrush(0x30, 0xFF, 0xFF, 0xFF);
+        CollapsedNib.Fill = CreateBrush(0xFF, 0xF3, 0xF5, 0xF8);
 
         foreach (var button in new[] { PointerButton, PenButton, ColorButton, UndoButton, RedoButton, MoreButton })
         {

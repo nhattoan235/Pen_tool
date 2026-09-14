@@ -151,3 +151,26 @@ Mỗi candidate phải được so sánh trên:
 - DPI 100%, 125%, 150%, 200% và ít nhất hai loại chuột thật.
 
 Không khóa Phase 7 chỉ bằng automated tests. Candidate cuối phải được người dùng vẽ thử và chấp nhận trực tiếp; renderer hiện tại luôn được giữ làm baseline rollback.
+
+## 11. Phase 7G — Signature Ink Polish gate
+
+Candidate A/B/C phải chạy cùng trace/corpus và cùng màu/cỡ. Bắt buộc kiểm tra dot, nét 5–20 px, đường nhanh/chậm, chữ `S/3/4/5/8`, zigzag, vòng kín và hai nét chồng nhau.
+
+Visual matrix tối thiểu:
+
+- Màu đỏ và xanh.
+- Nền trắng, xám trung tính và tối.
+- Pen Small/Medium/Large.
+- Nét tạm thời ở trạng thái full opacity, đang fade và final capture.
+
+Regression bắt buộc:
+
+- Không thay đổi raw endpoint, smoothing lag hoặc topology của Natural Pen 7F ngoài phạm vi candidate đã khai báo.
+- Dot/nét ngắn tròn và không bị mất thân; corner không blob; overlap không đứt core/seam.
+- Pixel Eraser xóa cả base/core đúng vùng; Object Eraser xóa cả stroke.
+- Lasso move, Delete, Undo/Redo và snap không tách hai lớp mực.
+- Temporary ink giữ màu đầy đủ đến fade window rồi giảm alpha đồng bộ.
+- Render lặp lại cùng stroke data không nhấp nháy hoặc đổi micro-variation.
+- Input-to-preview, geometry build p95/max và trải nghiệm chuột thật không kém Candidate A.
+
+Không khóa chỉ bằng screenshot hoặc automated tests. Người dùng phải vẽ A/B trực tiếp và chọn candidate thắng trước khi packaging.

@@ -19,6 +19,19 @@ public partial class OverlayWindow : Window
 {
     private const double NaturalInkCoreSizeRatio = 0.64;
     private const double NaturalInkCoreOpacity = 0.42;
+    private const double NaturalPenThinning = 1.00;
+    private const double NaturalPenMaximumSpeed = 0.65;
+    private const double NaturalPenSpeedResponseExponent = 0.80;
+    private const double NaturalPenPressureSmoothing = 0.52;
+    private const double NaturalInkCoreThinning = 1.00;
+    private const double NaturalInkCoreMaximumSpeed = 0.60;
+    private const double NaturalInkCoreSpeedResponseExponent = 0.78;
+    private const double NaturalInkCorePressureSmoothing = 0.46;
+    private const double NaturalInkCornerPoolingStrength = 0.14;
+    private const double NaturalInkCornerPoolingSmoothing = 0.48;
+    private const double NaturalInkDotThresholdLength = 1.25;
+    private const double NaturalInkCoverageVariationStrength = 0.024;
+    private const double NaturalInkCoverageVariationWavelength = 18.0;
     private readonly DisplayDescriptor _display;
     private readonly IAppLogger _logger;
     private readonly InkStyleController _inkStyleController;
@@ -620,7 +633,7 @@ public partial class OverlayWindow : Window
         _strokeQualityRecorder.Record(new StrokeQualitySample(
             strokeId,
             DateTimeOffset.UtcNow,
-            "9C-natural-ink-b",
+            "7G-signature-ink-final",
             _display.Id,
             _activeInkTool,
             _activeStrokeSize,
@@ -1118,11 +1131,14 @@ public partial class OverlayWindow : Window
         return new FreehandStrokeOutlineBuilder(new FreehandStrokeOptions
         {
             Size = size,
-            Thinning = tool == InkTool.Highlighter ? 0 : 0.48,
+            Thinning = tool == InkTool.Highlighter ? 0 : NaturalPenThinning,
             StartTaperLength = 0,
             EndTaperLength = 0,
-            MaximumSpeed = 0.85,
-            PressureSmoothing = 0.36,
+            MaximumSpeed = tool == InkTool.Highlighter ? 0.85 : NaturalPenMaximumSpeed,
+            SpeedResponseExponent = tool == InkTool.Highlighter ? 1 : NaturalPenSpeedResponseExponent,
+            UseOpenEndedSpeedResponse = tool != InkTool.Highlighter,
+            PressureSmoothing = tool == InkTool.Highlighter ? 0.36 : NaturalPenPressureSmoothing,
+            DotThresholdLength = tool == InkTool.Highlighter ? 0 : NaturalInkDotThresholdLength,
         });
     }
 
@@ -1131,11 +1147,18 @@ public partial class OverlayWindow : Window
         return new FreehandStrokeOutlineBuilder(new FreehandStrokeOptions
         {
             Size = size * NaturalInkCoreSizeRatio,
-            Thinning = 0.76,
+            Thinning = NaturalInkCoreThinning,
             StartTaperLength = 0,
             EndTaperLength = 0,
-            MaximumSpeed = 0.85,
-            PressureSmoothing = 0.40,
+            MaximumSpeed = NaturalInkCoreMaximumSpeed,
+            SpeedResponseExponent = NaturalInkCoreSpeedResponseExponent,
+            UseOpenEndedSpeedResponse = true,
+            PressureSmoothing = NaturalInkCorePressureSmoothing,
+            CornerPoolingStrength = NaturalInkCornerPoolingStrength,
+            CornerPoolingSmoothing = NaturalInkCornerPoolingSmoothing,
+            DotThresholdLength = NaturalInkDotThresholdLength,
+            CoverageVariationStrength = NaturalInkCoverageVariationStrength,
+            CoverageVariationWavelength = NaturalInkCoverageVariationWavelength,
         });
     }
 

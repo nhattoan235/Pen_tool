@@ -201,6 +201,21 @@ Trạng thái: Natural Pen 7F đã được người dùng chấp nhận và kh�
 
 Slice 7B đã coalesce geometry build theo WPF composition frame, giữ force-update ở mouse-down/mouse-up và không thay đổi point/smoothing math. Baseline 105 stroke đã được tổng hợp trong `09_PHASE7_BASELINE_REPORT.md`; candidate chờ A/B thực tế.
 
+### Phase 7G — Signature Ink Polish
+
+Mục tiêu: giữ nguyên cảm giác điều khiển Natural Pen 7F nhưng làm nét có dấu ấn riêng thông qua first-contact response, chiều sâu mực theo chuyển động, góc cua/overlap và micro-variation xác định. Đặc tả đầy đủ nằm trong `10_PHASE7G_SIGNATURE_INK_POLISH.md`.
+
+Deliverables:
+
+- [x] Khóa Natural Pen 7F + Natural Ink B làm Candidate A/rollback.
+- [x] Candidate B: depth mapping và corner ink pooling có giới hạn chống blob; chờ A/B bằng chuột thật.
+- [x] Candidate C1: dot/nét ngắn chuyển thành round capsule và deterministic core variation 2,4%; chờ A/B trực tiếp.
+- [x] A/B trực tiếp nhiều màu/nền bằng chuột thật; người dùng khóa C1 làm Signature Ink cuối.
+- [ ] Regression Eraser, Lasso, history, temporary fade và capture cho toàn bộ lớp mực.
+- [x] Người dùng chọn C1 (B4 base) và khóa renderer/color cho beta.
+
+Guardrail: không đổi smoothing/path đã khóa, không texture/noise rõ, không shadow/glow, không pressure quá mức và không hy sinh latency để tăng hiệu ứng.
+
 ## Phase 8 — Capture và multi-monitor hardening
 
 Mục tiêu: xuất kết quả đúng và ổn định trên cấu hình thực tế.
@@ -228,7 +243,7 @@ Mục tiêu: tạo bản dùng thử ổn định.
 
 Deliverables:
 
-- [ ] Single-user installer/package.
+- [x] Single-user installer/package candidate `0.9.0-beta.1`; install/smoke/uninstall cô lập đạt.
 - [x] Auto-start tùy chọn, mặc định tắt — Phase 9A candidate.
 - [x] Settings cho hotkeys với rollback khi tổ hợp bị chiếm — Phase 9A candidate.
 - [x] Crash-safe recovery candidate: session marker, clean-exit cleanup và volatile-state reset.
@@ -243,8 +258,8 @@ Thứ tự Phase 9 đã chốt:
 1. Settings hotkey + Start with Windows.
 2. Crash-safe recovery và single-instance protection. — candidate đã triển khai
 3. Accessibility cơ bản + manual regression.
-4. Thảo luận, prototype và khóa Color & Ink Appearance. — Natural Ink candidate đang A/B
-5. Packaging/installer cuối; reduced motion và notices chưa nằm trong scope hiện tại.
+4. Phase 7G Signature Ink Polish: hoàn thành; C1/B4 đã khóa Color & Ink Appearance.
+5. Packaging/installer candidate hoàn thành; còn manual UI regression và quyết định code signing trước phân phối. Reduced motion/notices chưa nằm trong scope hiện tại.
 
 Exit criteria:
 

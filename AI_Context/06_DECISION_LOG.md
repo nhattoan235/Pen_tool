@@ -280,3 +280,75 @@ Kết quả kéo HWND qua WPF PreviewMouseMove vẫn thất bại trên máy th�
 Kết quả low-level hook vẫn thất bại thực tế do callback hook và UI dispatcher không tạo được một native drag loop ổn định cho no-activate window. Phương án này bị loại. Candidate kế tiếp dùng `ReleaseCapture` + `WM_NCLBUTTONDOWN(HTCAPTION)` ngay tại PreviewMouseDown của dot: Windows trực tiếp sở hữu vòng kéo; khi nhả chuột, app chỉ phân biệt click/drag để mở hoặc snap cạnh. Phần hook trở lại đúng phạm vi shortcut/click-outside ban đầu.
 
 Drop-shadow của toolbar bị xóa hoàn toàn ở cả dark và light theme. Theme chỉ còn surface, border và foreground để capsule/dot không tạo quầng giả trên nền màn hình.
+
+## D-031 — Phase 7G tạo Signature Ink nhưng không viết lại Natural Pen 7F
+
+Trạng thái: Kế hoạch đã chốt, chưa triển khai renderer.
+
+Natural Pen 7F tiếp tục là baseline điều khiển và rollback. Phase 7G chỉ polish dấu ấn thị giác theo ba candidate: A là 7F + Natural Ink B hiện tại; B thử depth mapping và tích mực nhẹ ở vùng giảm tốc/đổi hướng; C tiếp tục tối ưu dot/nét ngắn, 50–100 ms đầu và micro-variation xác định.
+
+Ưu tiên là first contact, chiều sâu mực, góc cua/overlap và tương phản đỏ/xanh trên nền trắng/xám/tối. Cấm texture/noise rõ, random theo frame, shadow/glow, calligraphy pressure quá mức, background sampling hoặc thay smoothing/path đã khóa chỉ để tăng hiệu ứng.
+
+Phase chỉ hoàn thành sau A/B bằng chuột thật, regression Eraser/Lasso/history/fade/capture và xác nhận trực tiếp của người dùng. Candidate thắng sẽ đóng băng renderer/color cho beta trước packaging.
+
+## D-032 — Candidate 7G-B chỉ biến đổi coverage của ink core
+
+Trạng thái: Candidate đã triển khai, chờ đánh giá trực tiếp.
+
+Centerline, smoothing, outline chính, cap và width response của Natural Pen 7F được giữ nguyên. Ink core nhạy với speed hơn (`Thinning 0,84`, `MaximumSpeed 0,78`, smoothing `0,44`) và có corner pooling tối đa lý thuyết 14%. Pooling được dẫn động bởi góc đổi hướng và trọng số chuyển động chậm, vì vậy góc chậm sâu mực hơn nhưng góc nhanh không phình mạnh; đường thẳng nhận pooling bằng 0.
+
+Không thêm Path/layer, random, texture, shadow hoặc opacity animation mới. Hai geometry test khóa hành vi: góc chậm phải tăng coverage nhìn thấy nhưng không vượt anti-blob limit; đường thẳng phải không bị thay đổi bởi riêng corner pooling.
+
+## D-033 — High-speed tail không được bão hòa ở tốc độ viết thường
+
+Trạng thái: Candidate 7G-B2, chờ đánh giá trực tiếp.
+
+Người dùng xác nhận góc cua của 7G-B tự nhiên nhưng nét sau không nhỏ thêm khi tiếp tục tăng tốc. Trace 14 nét thật đo `p90` đến `2,73 px/ms` và max khoảng `4,02 px/ms`; mapping cũ clamp từ `0,85 px/ms`, đúng với hiện tượng thị giác.
+
+B2 dùng speed response phi tuyến `pow(clamp(speed/max), exponent)` với max khoảng `3 px/ms`, thay vì clamp tuyến tính sớm. Width giảm liên tục qua vùng nhanh vừa → nhanh → quét rất nhanh. Renderer không tự biến curve thành line vì điều đó làm sai ý định; centerline/smoothing giữ nguyên, chỉ outline/core width thay đổi. Automated test khóa thứ tự `slow width > fast width > very-fast width` và đáy width để nét nhanh không trở nên quá mảnh, dễ vỡ.
+
+## D-034 — Candidate 7G-B3 dùng speed response đuôi mở
+
+Trạng thái: Candidate chờ đánh giá trực tiếp.
+
+B2 được người dùng đánh giá tốt hơn một chút nhưng trace mới có sample `8–28 px/ms`, vượt xa clamp `3,2 px/ms`. Không tiếp tục nâng một hard limit vì sẽ làm vùng viết chậm kém nhạy và vẫn thất bại ở polling pattern khác.
+
+B3 dùng hàm tiệm cận không clamp `v^e/(1+v^e)`. Nét tiếp tục mảnh dần từ nhanh vừa đến cú quét cực nhanh nhưng width không về 0. Main/core giữ round cap và centerline cũ; corner pooling đã được chấp nhận nên không đổi. Test hiện so sánh bốn mức `0,2 / 0,85 / 2,4 / 12 px/ms` và yêu cầu width giảm nghiêm ngặt nhưng nét 8 px vẫn rộng tối thiểu 5 px ở mức cực nhanh.
+
+## D-035 — Candidate 7G-B4 phải đủ khác để A/B bằng mắt
+
+Trạng thái: Candidate expressive chờ đánh giá trực tiếp.
+
+B3 đúng về toán nhưng người dùng vẫn thấy không khác nhiều. Replay trace preset 8 px cho thấy width khoảng `5,4–10,4 px`; trên nét dài, thay đổi này chưa tạo dấu ấn thị giác rõ. B4 tăng main thinning từ `0,72` lên `1,00` và response smoothing `0,42 → 0,52`, dự kiến mở khoảng thành `4,4–11,4 px` trên cùng trace.
+
+Đây là A/B biên độ, không phải thay topology: centerline, round cap, open-ended response, ink core và corner pooling giữ nguyên. Width floor regression của preset 8 px được điều chỉnh từ 5,0 xuống 4,2 px nhưng vẫn cấm nét biến mất/đứt. Nếu B4 quá biểu cảm, candidate cuối sẽ nội suy tham số giữa B3 và B4.
+
+## D-036 — Candidate 7G-C1 chỉ polish first contact và core texture
+
+Trạng thái: Candidate chờ đánh giá trực tiếp; B4 là rollback.
+
+Người dùng đánh giá cảm giác B4 có vẻ ổn, vì vậy không tăng thinning/corner response thêm. C1 hạ dot threshold về độ dài vật lý 1,25 px thay vì bằng toàn bộ pen size: click/jitter rất nhỏ vẫn là dot, còn nét 5–20 px giữ phương hướng thành capsule có hai round cap.
+
+Micro-variation chỉ thay coverage của ink core tối đa 2,4% theo hai sóng xác định từ cumulative distance và tọa độ bắt đầu. Main silhouette B4 không nhận variation; cùng input render lặp lại cho cùng kết quả và không có random theo frame. Hai test mới khóa short capsule cùng tính deterministic/bounded, nâng suite lên 36 test.
+
+## D-037 — Signature Ink cuối là C1 trên nền B4
+
+Trạng thái: Chốt theo xác nhận trực tiếp của người dùng.
+
+Người dùng xác nhận C1 ổn sau khi thử dot, short capsule, chữ nhỏ và nét dài. Renderer cuối giữ B4 expressive open-ended velocity response, corner pooling 14%, dot threshold 1,25 px và deterministic core variation 2,4%/18 px. Nhãn recorder chuyển thành `7G-signature-ink-final`.
+
+Color & Ink Appearance gate được khóa. Không tuning thêm trước beta nếu không có regression P0/P1 tái hiện được; B4 không micro-variation là rollback gần nhất.
+
+## D-038 — Collapsed control dùng signature ink puck, không dùng record dot
+
+Trạng thái: Chốt theo xác nhận trực tiếp của người dùng.
+
+Collapsed button vẫn là puck tròn 38 px và giữ native caption drag, nhưng chấm tròn trung tâm bị thay bằng nét mực bất đối xứng theo màu đang chọn, facet nib trắng và inner disc phẳng. Thiết kế không dùng shadow/glow, tránh đọc nhầm thành nút Record và liên hệ trực tiếp với app icon. Người dùng xác nhận thiết kế mới tốt.
+
+## D-039 — Beta installer là self-contained single-user Inno Setup
+
+Trạng thái: Candidate đã build và xác minh install/uninstall.
+
+`0.9.0-beta.1` publish single-file self-contained `win-x64`, không yêu cầu máy đích có .NET. Inno Setup 7 dùng `PrivilegesRequired=lowest`, cài dưới `%LOCALAPPDATA%\Programs\Screen Ink`, tạo Start Menu shortcut và để Desktop shortcut là tùy chọn.
+
+Test cô lập đạt cho install → chạy published app → uninstall; không còn thư mục cài hoặc startup registry. Artifact 48,61 MiB có SHA-256 `BA12503E13E03844E85534D1DC40E9AD948E8ECEB32364BE8E2083964FE09E92`. Chưa có Authenticode certificate nên private beta có thể gặp SmartScreen; public distribution cần quyết định code signing.

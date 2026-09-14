@@ -2,7 +2,7 @@
 
 Screen Ink là ứng dụng Windows mouse-first để khoanh, vẽ và làm nổi bật nội dung trực tiếp trên màn hình. Annotation tạm thời mặc định tự biến mất sau khoảng hai giây.
 
-Project hiện đang ở giai đoạn xây dựng nền tảng. Product context và kế hoạch đầy đủ nằm trong [`AI_Context`](AI_Context/README.md).
+Project hiện có beta installer candidate `0.9.0-beta.1`. Product context, quyết định thiết kế và báo cáo đóng gói nằm trong [`AI_Context`](AI_Context/README.md).
 
 ## Yêu cầu phát triển
 
@@ -51,6 +51,22 @@ Nét mặc định tồn tại 1,65 giây rồi fade trong 0,35 giây. Giữ `Sh
 ```powershell
 dotnet run --project .\src\ScreenInk.App\ScreenInk.App.csproj -- --show
 ```
+
+## Publish và đóng gói beta
+
+Tạo bản self-contained `win-x64` không yêu cầu máy đích cài sẵn .NET:
+
+```powershell
+.\publish.ps1
+```
+
+Sau khi cài Inno Setup 7, tạo installer single-user:
+
+```powershell
+.\package.ps1
+```
+
+Installer mặc định cài vào `%LOCALAPPDATA%\Programs\Screen Ink`, không yêu cầu quyền administrator, tạo shortcut Start Menu và cho phép chọn thêm shortcut Desktop.
 
 ## Cấu trúc
 

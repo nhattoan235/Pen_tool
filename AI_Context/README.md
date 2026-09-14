@@ -22,6 +22,8 @@ Mục tiêu của bộ tài liệu là giúp mọi phiên làm việc sau này t
 7. `07_STATUS.md` — trạng thái hiện tại và bước tiếp theo.
 8. `08_PEN_STROKE_QUALITY_PHASE.md` — hợp đồng chất lượng, corpus, số đo và exit criteria riêng cho Phase 7.
 9. `09_PHASE7_BASELINE_REPORT.md` — số đo chuột thật của Candidate B và giả thuyết tối ưu cho candidate kế tiếp.
+10. `10_PHASE7G_SIGNATURE_INK_POLISH.md` — kế hoạch A/B để tạo dấu ấn mực riêng, tối ưu first contact, chiều sâu màu, góc cua và micro-variation có kiểm soát.
+11. `11_PHASE9_BETA_PACKAGING_REPORT.md` — cấu hình installer, artifact hash, kết quả install/uninstall và các gate còn lại trước khi phân phối beta.
 
 ## Tóm tắt đã chốt
 
