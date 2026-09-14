@@ -1,0 +1,23 @@
+# Build output
+bin/
+obj/
+artifacts/
+
+# Local SDK/NuGet state
+.dotnet_cli/
+.nuget/
+.appdata/
+
+# IDE state
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Runtime output
+*.log
+captures/
+
+# OS files
+Thumbs.db
+.DS_Store
