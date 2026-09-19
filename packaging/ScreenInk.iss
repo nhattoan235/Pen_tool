@@ -1,7 +1,7 @@
 #define MyAppName "Screen Ink"
 #define MyAppExeName "ScreenInk.exe"
 #ifndef MyAppVersion
-  #define MyAppVersion "0.9.0-beta.1"
+  #define MyAppVersion "0.9.0-beta.2"
 #endif
 
 [Setup]
@@ -30,11 +30,11 @@ CloseApplications=yes
 CloseApplicationsFilter={#MyAppExeName}
 RestartApplications=no
 MinVersion=10.0.17763
-VersionInfoVersion=0.9.0.1
+VersionInfoVersion=0.9.0.2
 VersionInfoCompany=nhattoan235
 VersionInfoDescription=Screen Ink single-user installer
 VersionInfoProductName={#MyAppName}
-VersionInfoProductVersion=0.9.0.1
+VersionInfoProductVersion=0.9.0.2
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"

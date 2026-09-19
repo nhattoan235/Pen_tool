@@ -99,7 +99,7 @@ ScreenInk.App
 - `Esc` và emergency hotkey được xử lý ở cấp app/global hotkey.
 - Right-click trong Draw/Select chuyển về Pointer.
 - Khi có unhandled exception ở overlay/input, fallback phải xóa input-capturing style hoặc đóng overlay.
-- Low-level mouse hook chỉ được dùng cho hai trường hợp mà cửa sổ `ShowActivated=False` không nhận ổn định: modifier+wheel trong Draw và phát hiện click ngoài toolbar trong Pointer. Callback chỉ enqueue hành động ngắn lên UI dispatcher, không lưu tọa độ/nội dung, trả ngay về hook chain với mọi sự kiện không được xử lý và luôn unhook khi app thoát.
+- Low-level mouse hook xử lý modifier+wheel trong Draw, phát hiện click ngoài toolbar trong Pointer và chỉ enqueue yêu cầu mở cửa sổ click-through cho wheel thường. Callback tuyệt đối không đổi window style, không gọi `SendInput` và không làm I/O. UI dispatcher mở pass-through trong 350 ms; các wheel tiếp theo trong burst được Windows hit-test tự nhiên tới ứng dụng bên dưới.
 
 ## 6. Data model
 

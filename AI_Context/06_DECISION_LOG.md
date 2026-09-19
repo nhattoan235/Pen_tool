@@ -352,3 +352,27 @@ Trạng thái: Candidate đã build và xác minh install/uninstall.
 `0.9.0-beta.1` publish single-file self-contained `win-x64`, không yêu cầu máy đích có .NET. Inno Setup 7 dùng `PrivilegesRequired=lowest`, cài dưới `%LOCALAPPDATA%\Programs\Screen Ink`, tạo Start Menu shortcut và để Desktop shortcut là tùy chọn.
 
 Test cô lập đạt cho install → chạy published app → uninstall; không còn thư mục cài hoặc startup registry. Artifact 48,61 MiB có SHA-256 `BA12503E13E03844E85534D1DC40E9AD948E8ECEB32364BE8E2083964FE09E92`. Chưa có Authenticode certificate nên private beta có thể gặp SmartScreen; public distribution cần quyết định code signing.
+
+## D-040 — Wheel thường xuyên qua Draw overlay
+
+Trạng thái: Đã triển khai, chờ xác nhận thao tác thật.
+
+Draw overlay phải nhận mouse hit để vẽ nên Windows không tự chuyển wheel tới trang phía dưới. Low-level hook giờ phân biệt ba luồng: `Shift+wheel` chuyển tool, `Ctrl+wheel` đổi độ dày, còn wheel không modifier luôn được chuyển tới cửa sổ ứng dụng nằm dưới lớp Screen Ink.
+
+Hai candidate gửi trực tiếp `WM_MOUSEWHEEL` bằng `PostMessage` tới child HWND/foreground window đều thất bại trên máy thật; Chrome/WebView có thể bỏ qua message tổng hợp dù handle hợp lệ. Candidate dùng `SendInput` trong low-level hook đã làm máy người dùng treo sau khi cuộn được một đoạn và bị loại vĩnh viễn; không được phục hồi cách này.
+
+Candidate an toàn hiện tại không tổng hợp hoặc phát lại input. Hook chỉ enqueue một yêu cầu ngắn sang UI dispatcher rồi trả event gốc về chain. Dispatcher bật `WS_EX_TRANSPARENT` trong 350 ms kể từ wheel gần nhất; wheel đầu tiên dùng để mở cửa sổ pass-through, các wheel tiếp theo trong burst được Windows phân phối tự nhiên tới ứng dụng dưới overlay. Không đổi window style, không gọi `SendInput`, không gửi message cross-process và không làm I/O ngay trong hook callback. `Shift+wheel`/`Ctrl+wheel` vẫn được xử lý riêng; modifier khác được trả nguyên.
+
+## D-041 — Loại bỏ scroll-linked ink
+
+Trạng thái: Đã loại theo yêu cầu người dùng.
+
+Các candidate dịch lớp ink theo wheel không thể đồng bộ đáng tin cậy với tốc độ cuộn riêng của từng ứng dụng, touchpad hoặc smooth-scroll engine. Người dùng đánh giá nét luôn chậm hơn trang và quyết định không cần chức năng này.
+
+Toàn bộ content offset, view transform, easing, calibration và chuyển đổi tọa độ liên quan đã được gỡ. Annotation trở lại cố định theo màn hình. Cơ chế wheel pass-through an toàn của D-040 vẫn được giữ nguyên; không tổng hợp hoặc phát lại input.
+
+## D-042 — Beta.2 đóng gói sau khi loại scroll-linked ink
+
+Trạng thái: Đã build và xác minh.
+
+Beta `0.9.0-beta.2` là bản phát hành mới sau quyết định loại D-041. Publish vẫn self-contained single-file `win-x64`; installer Inno Setup 7.1.0 single-user được tạo thành công. Core suite đạt `36/36`; artifact installer có SHA-256 `5B14CE97D253620A739C1C8FE8365C9A6C13F8F1648EC767A96230D1590A6EBE`. Artifact không commit vào Git; source và script đóng gói được push cùng source code.

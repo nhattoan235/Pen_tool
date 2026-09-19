@@ -243,7 +243,7 @@ Mục tiêu: tạo bản dùng thử ổn định.
 
 Deliverables:
 
-- [x] Single-user installer/package candidate `0.9.0-beta.1`; install/smoke/uninstall cô lập đạt.
+- [x] Single-user installer/package candidate `0.9.0-beta.2`; install/smoke/uninstall cô lập đạt.
 - [x] Auto-start tùy chọn, mặc định tắt — Phase 9A candidate.
 - [x] Settings cho hotkeys với rollback khi tổ hợp bị chiếm — Phase 9A candidate.
 - [x] Crash-safe recovery candidate: session marker, clean-exit cleanup và volatile-state reset.

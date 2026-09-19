@@ -151,6 +151,7 @@ public partial class App : System.Windows.Application
             _overlayManager.CycleTool,
             _overlayManager.AdjustCurrentToolSize,
             (screenX, screenY) => _toolbarWindow?.CollapseIfOutside(screenX, screenY),
+            _overlayManager.SetWheelPassThrough,
             _logger);
         _mouseShortcuts.SetMode(_modeController.Current);
 

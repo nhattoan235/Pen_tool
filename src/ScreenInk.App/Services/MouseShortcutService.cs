@@ -11,33 +11,39 @@ internal sealed class MouseShortcutService : IDisposable
 {
     private const int WheelDeltaPerDetent = 120;
     private const int WheelCommitDelayMilliseconds = 45;
+    private const int PlainWheelPassThroughMilliseconds = 350;
 
     private readonly Action<int> _cycleTool;
     private readonly Action<int> _adjustSize;
     private readonly Action<int, int> _pointerClick;
+    private readonly Action<bool> _setWheelPassThrough;
     private readonly IAppLogger _logger;
     private readonly Dispatcher _dispatcher;
     private readonly NativeMethods.LowLevelMouseProcedure _hookProcedure;
     private readonly object _wheelSync = new();
     private readonly System.Threading.Timer _toolCommitTimer;
     private readonly System.Threading.Timer _sizeCommitTimer;
+    private readonly DispatcherTimer _plainWheelPassThroughTimer;
     private nint _hookHandle;
     private int _toolWheelRemainder;
     private int _sizeWheelRemainder;
     private int _pendingToolSteps;
     private int _pendingSizeSteps;
     private InteractionMode _mode = InteractionMode.Pointer;
+    private bool _plainWheelPassThroughActive;
     private bool _disposed;
 
     public MouseShortcutService(
         Action<int> cycleTool,
         Action<int> adjustSize,
         Action<int, int> pointerClick,
+        Action<bool> setWheelPassThrough,
         IAppLogger logger)
     {
         _cycleTool = cycleTool ?? throw new ArgumentNullException(nameof(cycleTool));
         _adjustSize = adjustSize ?? throw new ArgumentNullException(nameof(adjustSize));
         _pointerClick = pointerClick ?? throw new ArgumentNullException(nameof(pointerClick));
+        _setWheelPassThrough = setWheelPassThrough ?? throw new ArgumentNullException(nameof(setWheelPassThrough));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _dispatcher = Dispatcher.CurrentDispatcher;
         _hookProcedure = OnMouseHook;
@@ -51,6 +57,11 @@ internal sealed class MouseShortcutService : IDisposable
             state: null,
             Timeout.Infinite,
             Timeout.Infinite);
+        _plainWheelPassThroughTimer = new DispatcherTimer(DispatcherPriority.Input, _dispatcher)
+        {
+            Interval = TimeSpan.FromMilliseconds(PlainWheelPassThroughMilliseconds),
+        };
+        _plainWheelPassThroughTimer.Tick += OnPlainWheelPassThroughTimer;
 
         _hookHandle = NativeMethods.SetWindowsHookEx(
             NativeMethods.WhMouseLowLevel,
@@ -72,6 +83,7 @@ internal sealed class MouseShortcutService : IDisposable
     public void SetMode(InteractionMode mode)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
+        EndPlainWheelPassThrough();
         _mode = mode;
     }
 
@@ -83,6 +95,8 @@ internal sealed class MouseShortcutService : IDisposable
         }
 
         _disposed = true;
+        EndPlainWheelPassThrough();
+        _plainWheelPassThroughTimer.Tick -= OnPlainWheelPassThroughTimer;
         _toolCommitTimer.Dispose();
         _sizeCommitTimer.Dispose();
 
@@ -112,14 +126,21 @@ internal sealed class MouseShortcutService : IDisposable
             var wheelDelta = unchecked((short)(hookData.MouseData >> 16));
             if (IsExactModifier(NativeMethods.VkShift))
             {
+                QueueEndPlainWheelPassThrough();
                 QueueToolWheel(wheelDelta);
                 return new nint(1);
             }
 
             if (IsExactModifier(NativeMethods.VkControl))
             {
+                QueueEndPlainWheelPassThrough();
                 QueueSizeWheel(wheelDelta);
                 return new nint(1);
+            }
+
+            if (!HasAnyModifier())
+            {
+                QueuePlainWheelPassThrough();
             }
         }
 
@@ -240,6 +261,80 @@ internal sealed class MouseShortcutService : IDisposable
             NativeMethods.VkShift => shift && !control && !alt,
             _ => false,
         };
+    }
+
+    private void BeginPlainWheelPassThrough()
+    {
+        if (!_plainWheelPassThroughActive)
+        {
+            _plainWheelPassThroughActive = true;
+            _setWheelPassThrough(true);
+        }
+
+        _plainWheelPassThroughTimer.Stop();
+        _plainWheelPassThroughTimer.Start();
+    }
+
+    private void QueuePlainWheelPassThrough()
+    {
+        if (_disposed || _dispatcher.HasShutdownStarted)
+        {
+            return;
+        }
+
+        _dispatcher.BeginInvoke(
+            () =>
+            {
+                if (!_disposed && _mode == InteractionMode.Draw)
+                {
+                    BeginPlainWheelPassThrough();
+                }
+            },
+            DispatcherPriority.Input);
+    }
+
+    private void QueueEndPlainWheelPassThrough()
+    {
+        if (_disposed || _dispatcher.HasShutdownStarted)
+        {
+            return;
+        }
+
+        _dispatcher.BeginInvoke(
+            () =>
+            {
+                if (!_disposed)
+                {
+                    EndPlainWheelPassThrough();
+                }
+            },
+            DispatcherPriority.Input);
+    }
+
+    private void OnPlainWheelPassThroughTimer(object? sender, EventArgs e)
+    {
+        EndPlainWheelPassThrough();
+    }
+
+    private void EndPlainWheelPassThrough()
+    {
+        _plainWheelPassThroughTimer.Stop();
+        if (!_plainWheelPassThroughActive)
+        {
+            return;
+        }
+
+        _plainWheelPassThroughActive = false;
+        _setWheelPassThrough(false);
+    }
+
+    private static bool HasAnyModifier()
+    {
+        return IsKeyDown(NativeMethods.VkControl) ||
+            IsKeyDown(NativeMethods.VkMenu) ||
+            IsKeyDown(NativeMethods.VkShift) ||
+            IsKeyDown(NativeMethods.VkLeftWindows) ||
+            IsKeyDown(NativeMethods.VkRightWindows);
     }
 
     private static bool IsKeyDown(int virtualKey)

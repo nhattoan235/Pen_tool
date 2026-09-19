@@ -264,6 +264,20 @@ public partial class OverlayWindow : Window
         }
     }
 
+    internal void SetWheelPassThrough(bool enabled)
+    {
+        if (_windowHandle == nint.Zero || _mode != InteractionMode.Draw)
+        {
+            return;
+        }
+
+        OverlayWindowStyles.SetInputMode(_windowHandle, acceptsInput: !enabled);
+        if (enabled)
+        {
+            CursorPreview.Visibility = Visibility.Collapsed;
+        }
+    }
+
     protected override void OnSourceInitialized(EventArgs e)
     {
         base.OnSourceInitialized(e);
@@ -364,7 +378,7 @@ public partial class OverlayWindow : Window
         }
 
         _lastAcceptedPointMilliseconds = _inputClock.ElapsedMilliseconds;
-        _lastAcceptedInputPoint = e.GetPosition(InputSurface);
+        _lastAcceptedInputPoint = position;
         AddPoint(_lastAcceptedInputPoint);
         _strokeElements.Add(_activeStrokeId, new StrokeVisual(
             _activePath,

@@ -11,7 +11,7 @@ Pipeline tạo self-contained single-file `win-x64`, sau đó biên dịch insta
 Có thể chỉ định compiler và phiên bản:
 
 ```powershell
-.\package.ps1 -Version 0.9.0-beta.1 -InnoCompiler 'C:\Path\To\ISCC.exe'
+.\package.ps1 -Version 0.9.0-beta.2 -InnoCompiler 'C:\Path\To\ISCC.exe'
 ```
 
 Output nằm trong `artifacts/installer` và bị loại khỏi Git. Trước khi phân phối, ghi SHA-256, chạy install/smoke/uninstall test và ký Authenticode nếu có certificate.

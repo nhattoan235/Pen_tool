@@ -138,6 +138,14 @@ internal sealed class OverlayManager : IDisposable
         GetOverlayAtCursor()?.ShowCurrentSizeFeedback();
     }
 
+    internal void SetWheelPassThrough(bool enabled)
+    {
+        foreach (var overlay in _windows)
+        {
+            overlay.SetWheelPassThrough(enabled);
+        }
+    }
+
     private OverlayWindow? GetOverlayAtCursor()
     {
         var cursor = Forms.Cursor.Position;

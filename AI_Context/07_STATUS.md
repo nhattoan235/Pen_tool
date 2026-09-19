@@ -152,9 +152,12 @@ Phase 0–5 hoàn thành ở mức MVP. Phase 6 đã có shape snap và Lasso se
 - [x] Signature Ink final build sạch ở Debug và Release; 36/36 tests đạt ở cả hai cấu hình.
 - [x] Debug/Release lifecycle smoke-test đạt; static regression xác nhận base/core cùng đi qua fade, Eraser, detach/restore, Lasso move và history snapshots.
 - [x] Collapsed ink puck mới thay record-like dot; người dùng xác nhận tốt, drag/click và no-shadow giữ nguyên.
-- [x] Publish self-contained single-file `win-x64` cho version `0.9.0-beta.1`; published smoke-test đạt.
+- [x] Publish self-contained single-file `win-x64` cho version `0.9.0-beta.2`; published smoke-test đạt.
 - [x] Inno Setup 7 single-user installer candidate; silent install/smoke/uninstall cô lập đều exit 0 và cleanup sạch.
 - [x] Ghi SHA-256/package report; installer hiện chưa ký Authenticode.
+- [ ] Wheel thường trong Draw mode: candidate `PostMessage` thất bại; candidate `SendInput` gây treo máy và đã bị loại vĩnh viễn.
+- [ ] Candidate an toàn hiện tại chỉ dùng dispatcher + cửa sổ click-through 350 ms, không tổng hợp input; cần xác nhận thao tác thật trước khi đánh dấu hoàn thành.
+- [x] Scroll-linked ink đã bị loại theo yêu cầu; annotation trở lại cố định theo màn hình và wheel pass-through an toàn vẫn được giữ.
 
 ## Chưa hoàn thành
 

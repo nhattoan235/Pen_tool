@@ -1,11 +1,11 @@
 # Phase 9 — Beta Packaging Report
 
-Ngày tạo: 2026-09-14
+Ngày tạo: 2026-09-19
 
 ## 1. Candidate
 
 - Product: Screen Ink
-- Version: `0.9.0-beta.1`
+- Version: `0.9.0-beta.2`
 - Target: Windows x64, Windows 10 build 17763 trở lên
 - Publish: self-contained, single-file .NET 10 WPF
 - Installer: Inno Setup 7.1.0 x64, single-user/non-admin
@@ -13,9 +13,9 @@ Ngày tạo: 2026-09-14
 
 ## 2. Artifact
 
-- File: `artifacts/installer/ScreenInk-Setup-0.9.0-beta.1-win-x64.exe`
-- Size: 50,967,388 bytes (48.61 MiB)
-- SHA-256: `BA12503E13E03844E85534D1DC40E9AD948E8ECEB32364BE8E2083964FE09E92`
+- File: `artifacts/installer/ScreenInk-Setup-0.9.0-beta.2-win-x64.exe`
+- Size: 50,960,478 bytes (48.60 MiB)
+- SHA-256: `5B14CE97D253620A739C1C8FE8365C9A6C13F8F1648EC767A96230D1590A6EBE`
 - Authenticode: chưa ký; có thể bị Windows SmartScreen cảnh báo trên máy chưa có reputation.
 
 Artifact build không được commit vào Git. Source of truth là `publish.ps1`, `package.ps1`, `packaging/ScreenInk.iss` và `packaging/NuGet.Publish.Config`.
@@ -32,7 +32,7 @@ Artifact build không được commit vào Git. Source of truth là `publish.ps1
 ## 4. Kết quả xác minh
 
 - Self-contained publish tạo đúng một `ScreenInk.exe`, 173,314,215 bytes.
-- Metadata EXE: Product `Screen Ink`, product version `0.9.0-beta.1`, file version `0.9.0.0`.
+- Metadata EXE: Product `Screen Ink`, product version `0.9.0-beta.2`, file version `0.9.0.1`.
 - Published EXE lifecycle smoke test: pass.
 - Inno compiler parse/verification/compression: pass.
 - Silent isolated install: exit code 0.
@@ -41,6 +41,7 @@ Artifact build không được commit vào Git. Source of truth là `publish.ps1
 - Thư mục cài test còn lại sau uninstall: false.
 - Startup registry value còn lại sau uninstall: không có.
 - Debug/Release core suite: 36/36 pass.
+- Beta.2 change: removed the rejected scroll-linked ink experiment; annotations are screen-fixed again while safe wheel pass-through remains.
 
 ## 5. Còn lại trước beta distribution
 

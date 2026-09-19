@@ -19,9 +19,9 @@
     <Product>Screen Ink</Product>
     <Authors>nhattoan235</Authors>
     <Description>Mouse-first screen annotation for Windows.</Description>
-    <Version>0.9.0-beta.1</Version>
-    <AssemblyVersion>0.9.0.0</AssemblyVersion>
-    <FileVersion>0.9.0.0</FileVersion>
+    <Version>0.9.0-beta.2</Version>
+    <AssemblyVersion>0.9.0.1</AssemblyVersion>
+    <FileVersion>0.9.0.1</FileVersion>
   </PropertyGroup>
 
 </Project>

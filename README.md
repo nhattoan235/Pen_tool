@@ -2,7 +2,7 @@
 
 Screen Ink là ứng dụng Windows mouse-first để khoanh, vẽ và làm nổi bật nội dung trực tiếp trên màn hình. Annotation tạm thời mặc định tự biến mất sau khoảng hai giây.
 
-Project hiện có beta installer candidate `0.9.0-beta.1`. Product context, quyết định thiết kế và báo cáo đóng gói nằm trong [`AI_Context`](AI_Context/README.md).
+Project hiện có beta installer candidate `0.9.0-beta.2`. Product context, quyết định thiết kế và báo cáo đóng gói nằm trong [`AI_Context`](AI_Context/README.md).
 
 ## Yêu cầu phát triển
 

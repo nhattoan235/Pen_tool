@@ -90,6 +90,7 @@ Không mở cửa sổ settings đầy đủ cho các thay đổi nhanh này.
 | `Shift` khi vẽ | Giữ nét thành Persistent |
 | `Ctrl + mouse wheel` | Chỉnh độ dày công cụ hiện tại |
 | `Shift + mouse wheel` trong Draw | Chuyển tool; wheel xuống tới tool kế, wheel lên quay lại |
+| Mouse wheel không modifier trong Draw | Cuộn cửa sổ/nội dung nằm dưới overlay |
 | Giữ cuối stroke khoảng 300 ms | Thử snap thành shape |
 | `Delete` khi có selection | Xóa selection |
 
@@ -97,7 +98,7 @@ Global hotkey ban đầu được đề xuất là `Ctrl+Shift+D`, nhưng phải
 
 Mouse 4/5 là mapping tùy chọn, không phải yêu cầu để sử dụng sản phẩm.
 
-`Shift+wheel` chỉ được Screen Ink xử lý khi Draw mode đang hoạt động. Modifier phải chính xác là `Shift`; trong Pointer mode tổ hợp được trả nguyên cho ứng dụng đang dùng. `Ctrl+wheel` tiếp tục điều chỉnh cỡ công cụ.
+`Shift+wheel` chỉ được Screen Ink xử lý khi Draw mode đang hoạt động. Modifier phải chính xác là `Shift`; trong Pointer mode tổ hợp được trả nguyên cho ứng dụng đang dùng. `Ctrl+wheel` tiếp tục điều chỉnh cỡ công cụ. Wheel thường trong Draw được chuyển tới đúng cửa sổ và child control bên dưới con trỏ, vì vậy người dùng có thể vừa giữ chế độ vẽ vừa cuộn trang.
 
 Ánh xạ màu nhanh đã chốt cho palette MVP:
 
