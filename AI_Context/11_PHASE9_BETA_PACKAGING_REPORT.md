@@ -42,6 +42,7 @@ Artifact build không được commit vào Git. Source of truth là `publish.ps1
 - Startup registry value còn lại sau uninstall: không có.
 - Debug/Release core suite: 36/36 pass.
 - Beta.2 change: removed the rejected scroll-linked ink experiment; annotations are screen-fixed again while safe wheel pass-through remains.
+- Beta.2 isolated installer smoke: install, installed `--smoke-test`, uninstall all passed; isolated install directory was removed.
 
 ## 5. Còn lại trước beta distribution
 
